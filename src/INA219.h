@@ -1,28 +1,17 @@
 /**************************************************************************/
-/*! 
-    @file     Adafruit_INA219.h
+/*!
+    @file     INA219.h
     @author   K. Townsend (Adafruit Industries)
+              Gavin Hurlbut <gjhurlbu@gmail.com>
 	@license  BSD (see license.txt)
 	
-	This is a library for the Adafruit INA219 breakout board
-	----> https://www.adafruit.com/products/???
-	
-	Adafruit invests time and resources providing this open source code, 
-	please support Adafruit and open-source hardware by purchasing 
-	products from Adafruit!
-
 	@section  HISTORY
 
     v1.0  - First release
 */
 /**************************************************************************/
 
-#if ARDUINO >= 100
- #include "Arduino.h"
-#else
- #include "WProgram.h"
-#endif
-
+#include "Arduino.h"
 #include <Wire.h>
 
 /*=========================================================================
@@ -54,7 +43,7 @@
     #define INA219_CONFIG_BADCRES_10BIT            (0x0100)  // 10-bit bus res = 0..1023
     #define INA219_CONFIG_BADCRES_11BIT            (0x0200)  // 11-bit bus res = 0..2047
     #define INA219_CONFIG_BADCRES_12BIT            (0x0400)  // 12-bit bus res = 0..4097
-    
+
     #define INA219_CONFIG_SADCRES_MASK             (0x0078)  // Shunt ADC Resolution and Averaging Mask
     #define INA219_CONFIG_SADCRES_9BIT_1S_84US     (0x0000)  // 1 x 9-bit shunt sample
     #define INA219_CONFIG_SADCRES_10BIT_1S_148US   (0x0008)  // 1 x 10-bit shunt sample
@@ -109,29 +98,35 @@
     #define INA219_REG_CALIBRATION                 (0x05)
 /*=========================================================================*/
 
-class Adafruit_INA219{
+class INA219 {
  public:
-  Adafruit_INA219(uint8_t addr = INA219_ADDRESS);
-  void begin(void);
-  void begin(uint8_t addr);
-  void setCalibration_32V_2A(void);
-  void setCalibration_32V_1A(void);
-  void setCalibration_16V_400mA(void);
-  float getBusVoltage_V(void);
-  float getShuntVoltage_mV(void);
-  float getCurrent_mA(void);
+    INA219(uint8_t addr = INA219_ADDRESS);
+    void begin(void);
+    void begin(uint8_t addr);
+    void setCalibration(uint8_t maxVoltage, uint16_t maxVShunt,
+                        uint16_t rShunt, float maxIExpected);
+    uint32_t getBusVoltage_mV(void);
+    uint32_t getShuntVoltage_mV(void);
+    uint32_t getCurrent_mA(void);
+    uint32_t getPower_mA(void);
 
  private:
-  uint8_t ina219_i2caddr;
-  uint32_t ina219_calValue;
-  // The following multipliers are used to convert raw current and power
-  // values to mA and mW, taking into account the current config settings
-  uint32_t ina219_currentDivider_mA;
-  uint32_t ina219_powerDivider_mW;
-  
-  void wireWriteRegister(uint8_t reg, uint16_t value);
-  void wireReadRegister(uint8_t reg, uint16_t *value);
-  int16_t getBusVoltage_raw(void);
-  int16_t getShuntVoltage_raw(void);
-  int16_t getCurrent_raw(void);
+    uint8_t  m_i2caddr;
+    uint16_t m_calValue;
+    uint16_t m_configValue;
+
+    // The following multipliers are used to convert raw current and power
+    // values to mA and mW, taking into account the current config settings
+    float m_current_lsb;
+    float m_power_lsb;
+
+    void wireWriteRegister(uint8_t reg, uint16_t value);
+    void wireReadRegister(uint8_t reg, uint16_t *value);
+
+    int16_t getBusVoltage_raw(void);
+    int16_t getShuntVoltage_raw(void);
+    int16_t getCurrent_raw(void);
+    int16_t getPower_raw(void);
 };
+
+// vim:ts=4:sw=4:ai:et:si:sts=4
