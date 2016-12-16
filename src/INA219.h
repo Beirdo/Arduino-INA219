@@ -108,7 +108,7 @@ class INA219 {
     uint32_t getBusVoltage_mV(void);
     uint32_t getShuntVoltage_mV(void);
     uint32_t getCurrent_mA(void);
-    uint32_t getPower_mA(void);
+    uint32_t getPower_mW(void);
 
  private:
     uint8_t  m_i2caddr;

@@ -74,7 +74,7 @@ void INA219::setCalibration(uint8_t maxVoltage, uint16_t maxVShunt,
         maxVShunt = 160;
     } else if (maxVShunt > 40) {
         maxVShunt = 80;
-    } esle {
+    } else {
         maxVShunt = 40;
     }
 
@@ -97,9 +97,9 @@ void INA219::setCalibration(uint8_t maxVoltage, uint16_t maxVShunt,
     // Set Config register to take into account the settings above
     m_configValue = (maxVoltage == 32 ? INA219_CONFIG_BVOLTAGERANGE_32V :
                      INA219_CONFIG_BVOLTAGERANGE_16V) |
-                    (maxVShunt == 40 ? INA_CONFIG_GAIN_1_40MV :
-                     (maxVShunt == 80 ? INA_CONFIG_GAIN_2_80MV :
-                      (maxVShunt == 160 ? INA_CONFIG_GAIN_4_160MV :
+                    (maxVShunt == 40 ? INA219_CONFIG_GAIN_1_40MV :
+                     (maxVShunt == 80 ? INA219_CONFIG_GAIN_2_80MV :
+                      (maxVShunt == 160 ? INA219_CONFIG_GAIN_4_160MV :
                        INA219_CONFIG_GAIN_8_320MV))) |
                     INA219_CONFIG_BADCRES_12BIT |
                     INA219_CONFIG_SADCRES_12BIT_1S_532US |
@@ -204,10 +204,10 @@ int16_t INA219::getPower_raw() {
         @brief  Gets the shunt voltage in mV (so +-327mV)
 */
 /**************************************************************************/
-float INA219::getShuntVoltage_mV() {
+uint32_t INA219::getShuntVoltage_mV() {
     int16_t value;
-    value = getShuntVoltage_raw();
-    return value * 0.01;
+    value = getShuntVoltage_raw() * 10;
+    return (uint32_t)(value < 0 ? -value : value);
 }
 
 /**************************************************************************/
@@ -217,7 +217,7 @@ float INA219::getShuntVoltage_mV() {
 /**************************************************************************/
 uint32_t INA219::getBusVoltage_mV() {
     int16_t value = getBusVoltage_raw();
-    return (uint32_t)(value < 0 : -value : value);
+    return (uint32_t)(value < 0 ? -value : value);
 }
 
 /**************************************************************************/
@@ -229,7 +229,7 @@ uint32_t INA219::getBusVoltage_mV() {
 uint32_t INA219::getCurrent_mA() {
     int16_t value = getCurrent_raw();
     int32_t valueOut = (int32_t)(value * m_current_lsb * 1000.0);
-    return (uint32_t)(valueOut < 0 : -valueOut : valueOut);
+    return (uint32_t)(valueOut < 0 ? -valueOut : valueOut);
 }
 
 /**************************************************************************/
@@ -241,7 +241,7 @@ uint32_t INA219::getCurrent_mA() {
 uint32_t INA219::getPower_mW() {
     int16_t value = getPower_raw();
     int32_t valueOut = (int32_t)(value * m_power_lsb * 1000.0);
-    return (uint32_t)(valueOut < 0 : -valueOut : valueOut);
+    return (uint32_t)(valueOut < 0 ? -valueOut : valueOut);
 }
 
 
